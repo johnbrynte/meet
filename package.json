@@ -1,0 +1,15 @@
+{
+  "name": "purrfectseating",
+  "version": "0.0.0",
+  "description": "A game about running a restaurant",
+  "scripts": {
+    "docs": "jsdoc -c conf.json -R README.md"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-connect": "^1.0.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "jaguarjs-jsdoc": "^1.0.2",
+    "jsdoc": "^3.4.3"
+  }
+}
