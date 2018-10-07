@@ -20,3 +20,13 @@ svg {
 .selection.active {
     stroke: #88f;
 }
+
+#mainTime {
+    text-align: center;
+    font-family: monospace;
+    font-size: 3em;
+    margin: 1em 0 0 0;
+}
+#mainTime.overtime {
+    color: red;
+}

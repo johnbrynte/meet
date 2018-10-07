@@ -24,6 +24,8 @@ for (var i = 0; i < 5; i++) {
 
 function update(dt) {
     d.render();
+
+    document.getElementById("mainTime").innerHTML = d.getTimeAsTimeString();
 }
 
 function fixedUpdate(dt) {
@@ -85,6 +87,7 @@ function Diagram(time) {
 
     this.done = false;
     this.tick = 0;
+    this.time = 0;
 
     this.active = null;
 
@@ -110,11 +113,13 @@ function Diagram(time) {
 
     this.update = function (dt) {
         if (!this.done) {
-            this.tick += dt * 1;
             if (this.tick >= time) {
                 this.done = true;
+                document.getElementById("mainTime").className += "overtime";
             }
         }
+
+        this.tick += dt * 1;
 
         var _this = this;
         var part = time / this.sections.length;
@@ -127,6 +132,7 @@ function Diagram(time) {
 
         if (this.active) {
             this.active.value += dt * 1;
+            this.time += dt * 1;
         }
 
         var offset = 0;
@@ -144,6 +150,19 @@ function Diagram(time) {
         this.active = s;
         this.active.selectionEl.setAttributeNS(null, 'class', 'selection active')
         this.active.active = true;
+    }
+
+    this.getTimeAsTimeString = function () {
+        var sec = Math.floor(this.time);
+        var hour = Math.floor(sec / (60 * 60));
+        sec = sec - hour * 60 * 60;
+        var min = Math.floor(sec / 60);
+        sec = sec - min * 60;
+        return [hour, numberToTwoDigit(min), numberToTwoDigit(sec)].join(":");
+
+        function numberToTwoDigit(n) {
+            return n < 10 ? "0" + n : "" + n;
+        }
     }
 }
 
