@@ -30,3 +30,7 @@ svg {
 #mainTime.overtime {
     color: red;
 }
+
+#mainOfTime {
+    text-align: center;
+}

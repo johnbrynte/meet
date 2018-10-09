@@ -30,6 +30,9 @@
     requestAnimationFrame(loop);
     timer.n = Date.now();
     timer.deltaTime = Math.min((timer.n - timer.p) / 1000, 1 / 4);
+    if (timer.deltaTime > 1 / 4) {
+      timer.deltaTime = 1 / 4;
+    }
     timer.a += timer.deltaTime;
     timer.p = timer.n;
 
