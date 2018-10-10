@@ -34,3 +34,18 @@ svg {
 #mainOfTime {
     text-align: center;
 }
+
+#activeTopic {
+    text-align: center;
+    font-family: monospace;
+    font-size: 2em;
+    margin: 0.5em 0;
+}
+
+.topic-item {
+    border-left: 2px solid;
+    padding-left: 4px;
+}
+.topic-item.active {
+    text-decoration: underline;
+}

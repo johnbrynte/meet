@@ -9,6 +9,8 @@ lib("states", function () {
 
     var _compileAPI = {
         eval: compileEval,
+        compileElement: compileElement,
+        attach: compileAttach,
     }
 
     var _current = null;
@@ -72,6 +74,27 @@ lib("states", function () {
         return (function () {
             return eval(str);
         }).call(this);
+    }
+
+    function compileElement(el, api, skipRootEl) {
+        el = $(el);
+        for (var name in _compiles) {
+            var c = _compiles[name];
+            if (!skipRootEl && typeof el.attr(name) != "undefined") {
+                c.compile.apply(null, [$(el), api, _compileAPI]);
+            }
+            el.find("[" + name + "]").each(function (i, e) {
+                c.compile.apply(null, [$(e), api, _compileAPI]);
+            });
+        }
+    }
+
+    function compileAttach(_name, el, api, _api) {
+        if (typeof el.attr(_name + "-api") != "undefined") {
+            return (function () {
+                return eval(el.attr(_name + "-api") + " = _api");
+            }).call(this);
+        }
     }
 
     function _getRootElem() {

@@ -2,3 +2,16 @@
 <div id="mainTime"></div>
 <p id="mainOfTime"></p>
 <div id="drawing"></div>
+
+<div id="activeTopic" bind="api.activeTopic()" bind-api="api.$activeTopic"></div>
+
+<div for="api.topics" for-api="api.$topics">
+    <p class="topic-item"
+        bind="api.item.text"
+        click="api.parent.selectTopic(api.index)"
+        style-obj="{'border-color': api.item.color}"
+        class-obj="{'active': api.index == api.parent.activeIndex()}"></p>
+</div>
+
+<input type="text" change="api.topic = params.value" change-api="api.$topic" enter="api.add()" placeholder="New topic">
+<button click="api.add()">Add</button>

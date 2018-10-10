@@ -9,6 +9,7 @@ lib("meet", ["states"], function (states) {
 
     timer(update, fixedUpdate);
 
+    var _api;
 
     states.add({
         name: "main",
@@ -22,9 +23,9 @@ lib("meet", ["states"], function (states) {
             div.appendChild(svg);
 
             d = new Diagram(params.time || 60);
-            for (var i = 0; i < 5; i++) {
-                d.addSection(new Section("A", false).setValue(0));
-            }
+            // for (var i = 0; i < 5; i++) {
+            //     d.addSection(new Section("A", false).setValue(0));
+            // }
 
             window.addEventListener("keydown", onkeydown);
 
@@ -38,10 +39,45 @@ lib("meet", ["states"], function (states) {
         api: function () {
             var api = {
                 back: back,
+                topics: [],
+                activeTopic: activeTopic,
+                activeIndex: activeIndex,
+                add: add,
+                selectTopic: selectTopic,
             };
+
+            _api = api;
 
             function back() {
                 states.set("start");
+            }
+
+            function add() {
+                if (!api.topic) {
+                    return;
+                }
+
+                var s = new Section(api.topic, false);
+                d.addSection(s);
+
+                api.topics.push({
+                    text: api.topic,
+                    color: s.color,
+                });
+                api.$topics.render();
+                api.$topic.set("");
+            }
+
+            function selectTopic(index) {
+                d.setActive(d.sections[index]);
+            }
+
+            function activeTopic() {
+                return d && d.active ? d.active.name : null;
+            }
+
+            function activeIndex() {
+                return d.sections.indexOf(d.active);
             }
 
             return api;
@@ -74,11 +110,12 @@ lib("meet", ["states"], function (states) {
     function Section(name, fixed) {
         var _this = this;
 
+        this.name = name;
         this.active = false;
+        this.color = 'rgb(' + [Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255)].join(',') + ')';
 
         var path = document.createElementNS(ns, 'path')
-        var c = 'rgb(' + [Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255)].join(',') + ')';
-        path.setAttributeNS(null, 'fill', c)
+        path.setAttributeNS(null, 'fill', this.color)
         svg.appendChild(path)
 
         var line = document.createElementNS(ns, 'path')
@@ -189,6 +226,9 @@ lib("meet", ["states"], function (states) {
             this.active = s;
             this.active.selectionEl.setAttributeNS(null, 'class', 'selection active')
             this.active.active = true;
+
+            _api.$topics.render();
+            _api.$activeTopic.render();
         }
 
         this.getTime = function () {
