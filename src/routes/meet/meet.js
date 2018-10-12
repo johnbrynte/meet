@@ -41,13 +41,9 @@ lib("meet", ["states"], function(states) {
             //     d.addSection(new Section("A", false).setValue(0));
             // }
 
-            window.addEventListener("keydown", onkeydown);
-
             _running = true;
         },
         unload: function() {
-            window.removeEventListener("keydown", onkeydown);
-
             _running = false;
         },
         api: function() {
@@ -97,14 +93,6 @@ lib("meet", ["states"], function(states) {
             return api;
         },
     });
-
-    function onkeydown(evt) {
-        switch (evt.keyCode) {
-            case 32:
-                d.addSection(new Section("A", false).setValue(0));
-                break;
-        }
-    }
 
     function update(dt) {
         if (_running) {
