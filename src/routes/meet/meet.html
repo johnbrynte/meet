@@ -1,17 +1,28 @@
-<button click="api.back()">Back</button>
+<div class="c_meet-top">
+    <button class="c_input-button" click="api.back()">Back</button>
+</div>
+
 <div id="mainTime"></div>
 <p id="mainOfTime"></p>
 <div id="drawing"></div>
 
 <div id="activeTopic" bind="api.activeTopic()" bind-api="api.$activeTopic"></div>
 
-<div for="api.topics" for-api="api.$topics">
-    <p class="topic-item"
-        bind="api.item.text"
-        click="api.parent.selectTopic(api.index)"
-        style-obj="{'border-color': api.item.color}"
-        class-obj="{'active': api.index == api.parent.activeIndex()}"></p>
-</div>
+<div class="c_meet-bottom">
+    <div class="c_meet-bottom__controls">
+        <input type="text" class="c_input-text"
+            change="api.topic = params.value" change-api="api.$topic" enter="api.add()" placeholder="New topic">
+        <button class="c_input-button"
+            click="api.add()">Add</button>
+    </div>
 
-<input type="text" change="api.topic = params.value" change-api="api.$topic" enter="api.add()" placeholder="New topic">
-<button click="api.add()">Add</button>
+    <div class="c_meet-bottom__content">
+        <div for="api.topics" for-api="api.$topics">
+            <p class="topic-item"
+                bind="api.item.text"
+                click="api.parent.selectTopic(api.index)"
+                style-obj="{'border-color': api.item.color}"
+                class-obj="{'active': api.index == api.parent.activeIndex()}"></p>
+        </div>
+    </div>
+</div>

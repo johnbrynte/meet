@@ -1,3 +1,9 @@
-<h1>Hello</h1>
-<input type="text" change="api.time = params.value" placeholder="time">
-<button click="api.test()">Start</button>
+<div class="v_start">
+    <h1>Let's meet!</h1>
+    <p>For how long will you meet?</p>
+    <input class="c_input-text" type="text"
+        change="api.time = params.value"
+        enter="api.start()"
+        placeholder="20 min">
+    <button class="c_input-button" click="api.start()">Start meeting</button>
+</div>

@@ -1,8 +1,8 @@
-lib("meet", ["states"], function (states) {
+lib("meet", ["states"], function(states) {
 
     var ns = 'http://www.w3.org/2000/svg'
 
-    var svg;
+    var svg, pathRoot, lineRoot, selectionRoot;
 
     var d;
     var _running = false;
@@ -14,13 +14,27 @@ lib("meet", ["states"], function (states) {
     states.add({
         name: "main",
         template: "src/routes/meet/meet.html",
-        load: function (params) {
+        load: function(params) {
             svg = document.createElementNS(ns, 'svg');
             // svg.setAttributeNS(null, 'width', 120)
             // svg.setAttributeNS(null, 'height', 120)
             svg.setAttributeNS(null, 'viewBox', '0 0 120 120')
             var div = document.getElementById('drawing')
             div.appendChild(svg);
+
+            var circle = document.createElementNS(ns, 'circle')
+            circle.setAttributeNS(null, 'cx', '60')
+            circle.setAttributeNS(null, 'cy', '60')
+            circle.setAttributeNS(null, 'r', '50')
+            circle.setAttributeNS(null, 'class', 'circle-root')
+            svg.appendChild(circle);
+
+            pathRoot = document.createElementNS(ns, 'g')
+            svg.appendChild(pathRoot)
+            lineRoot = document.createElementNS(ns, 'g')
+            svg.appendChild(lineRoot)
+            selectionRoot = document.createElementNS(ns, 'g')
+            svg.appendChild(selectionRoot)
 
             d = new Diagram(params.time || 60);
             // for (var i = 0; i < 5; i++) {
@@ -31,12 +45,12 @@ lib("meet", ["states"], function (states) {
 
             _running = true;
         },
-        unload: function () {
+        unload: function() {
             window.removeEventListener("keydown", onkeydown);
 
             _running = false;
         },
-        api: function () {
+        api: function() {
             var api = {
                 back: back,
                 topics: [],
@@ -112,47 +126,48 @@ lib("meet", ["states"], function (states) {
 
         this.name = name;
         this.active = false;
-        this.color = 'rgb(' + [Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255)].join(',') + ')';
+        this.color = 'rgb(' + [Math.round(255 - Math.random() * 128), Math.round(255 - Math.random() * 128), Math.round(255 - Math.random() * 128)].join(',') + ')';
 
         var path = document.createElementNS(ns, 'path')
         path.setAttributeNS(null, 'fill', this.color)
-        svg.appendChild(path)
+        pathRoot.appendChild(path)
 
         var line = document.createElementNS(ns, 'path')
-        line.setAttributeNS(null, 'stroke', 'black')
-        svg.appendChild(line)
+        line.setAttributeNS(null, 'stroke', '#ddd')
+        lineRoot.appendChild(line)
 
         var selection = document.createElementNS(ns, 'path')
         selection.setAttributeNS(null, 'class', 'selection')
-        svg.appendChild(selection)
-        selection.addEventListener("click", function () {
+        selectionRoot.appendChild(selection)
+        selection.addEventListener("click", function() {
             _this.diagram.setActive(_this);
         })
         this.selectionEl = selection;
 
+        this.total = 0;
         this.value = 0;
         this.virtualValue = 0;
         this.diagram = null;
 
-        this.setValue = function (v) {
+        this.setValue = function(v) {
             this.value = v;
             return this;
         }
 
-        this.render = function (scale) {
+        this.render = function(scale) {
             var offset = this.virtualValue;
-            path.setAttributeNS(null, 'd', describeArc(60, 60, 60, 60, 50, offset, offset + this.value * scale))
-            selection.setAttributeNS(null, 'd', describeArc(60, 60, 60, 60, 50, offset, offset + this.getSize() * scale))
+            path.setAttributeNS(null, 'd', describeArc(60, 60, 60, 60, 50, offset, Math.min(359.999, offset + this.value * scale)))
+            selection.setAttributeNS(null, 'd', describeArc(60, 60, 60, 60, 50, offset, Math.min(359.999, offset + this.getSize() * scale)))
             var a = (offset - 90) * Math.PI / 180;
             line.setAttributeNS(null, 'd', 'M 60 60 L ' + [60 + 50 * Math.cos(a), 60 + 50 * Math.sin(a)].join(' '))
         }
 
-        this.update = function (dt, offset, scale) {
+        this.update = function(dt, offset, scale) {
             this.virtualValue += (offset - this.virtualValue) * dt * 10;
         }
 
-        this.getSize = function () {
-            return Math.max(this.value, !this.fixed ? this.diagram.part : this.value);
+        this.getSize = function() {
+            return !this.fixed ? this.total + this.value : this.value;
         }
     }
 
@@ -167,7 +182,7 @@ lib("meet", ["states"], function (states) {
 
         this.active = null;
 
-        this.addSection = function (section) {
+        this.addSection = function(section) {
             var offset = 0;
             for (var i = 0; i < this.sections.length - 1; i++) {
                 offset += this.sections[i].getSize() * 360 / this.total;
@@ -178,32 +193,53 @@ lib("meet", ["states"], function (states) {
             section.virtualValue = offset;
         }
 
-        this.render = function () {
+        this.render = function() {
             var _this = this;
             var offset = 0;
-            this.sections.forEach(function (s) {
+            this.sections.forEach(function(s) {
                 s.render(360 / _this.total);
                 //offset += Math.max(_this.part, s.virtualValue) * 360 / _this.total;
             });
         }
 
-        this.update = function (dt) {
+        this.update = function(dt) {
+            var _this = this;
+
             this.tick += dt * 1;
 
-            var _this = this;
-            var part = time / (this.sections.length || 1);
-            var total = 0;
-            this.sections.forEach(function (s) {
-                total += Math.max(part, s.value);
+            var _total = 0;
+            this.sections.forEach(function(s) {
+                _total += s.value;
             });
-            this.part = part;
+            var _timeLeft = Math.max(0, time - _total);
+            var _part = time / (this.sections.length || 1);
+
+            var _partTotal = 0;
+            this.sections.forEach(function(s) {
+                if (s.value >= _part) {
+                    s._part = 0;
+                } else {
+                    s._part = s.value == 0 ? 1 : (_part - s.value) / _part;
+                }
+                _partTotal += s._part;
+            });
+            this.sections.forEach(function(s) {
+                s.total = _timeLeft * s._part / _partTotal;
+            });
+
+            var total = 0;
+            this.sections.forEach(function(s) {
+                total += s.getSize();
+            });
+            this.part = _part;
             this.total = total;
 
             if (this.active) {
-                this.active.value += dt * 1;
-                this.time += dt * 1;
 
                 if (!this.done) {
+                    this.active.value += dt * 1;
+                    this.time += dt * 1;
+
                     if (this.time >= time) {
                         this.done = true;
                         document.getElementById("mainTime").className += "overtime";
@@ -212,13 +248,13 @@ lib("meet", ["states"], function (states) {
             }
 
             var offset = 0;
-            this.sections.forEach(function (s) {
+            this.sections.forEach(function(s) {
                 s.update(dt, offset, 360 / _this.total);
                 offset += s.getSize() * 360 / _this.total;
             });
         }
 
-        this.setActive = function (s) {
+        this.setActive = function(s) {
             if (this.active) {
                 this.active.selectionEl.setAttributeNS(null, 'class', 'selection')
                 this.active.active = false;
@@ -231,16 +267,16 @@ lib("meet", ["states"], function (states) {
             _api.$activeTopic.render();
         }
 
-        this.getTime = function () {
+        this.getTime = function() {
             return time;
         }
 
-        this.getTimeAsTimeString = function () {
+        this.getTimeAsTimeString = function() {
             return Diagram.getAsTimeString(this.time);
         }
     }
 
-    Diagram.getAsTimeString = function (time) {
+    Diagram.getAsTimeString = function(time) {
         var sec = Math.floor(time);
         var hour = Math.floor(sec / (60 * 60));
         sec = sec - hour * 60 * 60;
@@ -272,7 +308,8 @@ lib("meet", ["states"], function (states) {
         var d = [
             "M", sx, sy,
             "L", start.x, start.y,
-            "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
+            "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+            "Z"
         ].join(" ");
 
         return d;

@@ -1,23 +1,130 @@
-body {
-    margin: 0;
+* {
+    box-sizing: border-box;
 }
 
-#drawing {
+body {
+    margin: 0;
+    background: #46474c;
+    color: #eee
+}
+
+body, input, button {
+    font-family: 'Raleway';
+}
+
+.v_root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
 }
 
-svg {
-    display: block;
+.c_input-text {
+    font-size: 1em;
+    padding: 0.2em 0.4em;
+}
+
+.c_input-button {
+    background: #555;
+    color: #ddd;
+    font-size: 1em;
+    padding: 0.2em 0.4em;
+    margin: 0.4em 0;
+}
+
+.c_input-text, .c_input-button {
+    border: 1px solid #ddd;
+}
+
+/* start */
+
+.v_start {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.v_start .c_input-text {
+    width: 100%;
+}
+
+.v_start .c_input-button {
+    float: right;
+    width: 100%;
+}
+
+/* start end */
+
+/* meet */
+
+.c_meet-top {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    font-size: 0.8em;
+}
+
+.c_meet-bottom {
+    max-height: 24vh;
     width: 100%;
     max-width: 500px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.c_meet-bottom__controls {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.c_meet-bottom__controls .c_input-text {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.c_meet-bottom__content {
+    overflow-y: auto;
+}
+
+/* meet end */
+
+#drawing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    flex: 1;
+}
+
+svg {
+    display: block;
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+}
+
+.circle-root {
+    fill: transparent;
+    stroke: #ddd;
 }
 
 .selection {
     fill: transparent;
+    z-index: 100;
 }
 .selection.active {
+    /* fill: rgba(200,200,256,0.2); */
     stroke: #88f;
 }
 
@@ -25,7 +132,7 @@ svg {
     text-align: center;
     font-family: monospace;
     font-size: 3em;
-    margin: 1em 0 0 0;
+    margin: 0.2em 0 0 0;
 }
 #mainTime.overtime {
     color: red;
