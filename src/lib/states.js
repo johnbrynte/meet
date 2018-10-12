@@ -1,4 +1,4 @@
-lib("states", function () {
+lib("states", function() {
 
     var self = {
         add: add,
@@ -43,19 +43,19 @@ lib("states", function () {
         var el = _getRootElem();
         el.html("");
 
-        new Promise(function (resolve, reject) {
+        new Promise(function(resolve, reject) {
             if (opts.template) {
                 if (_templateCache[opts.template]) {
                     _compileTemplate(opts.template);
                     resolve();
                 } else {
-                    _loadTemplate(opts.template).then(function () {
+                    _loadTemplate(opts.template).then(function() {
                         _compileTemplate(opts.template);
                         resolve();
                     });
                 }
             }
-        }).then(function () {
+        }).then(function() {
             if (opts.load) {
                 opts.load(params);
             }
@@ -71,7 +71,7 @@ lib("states", function () {
     }
 
     function compileEval(api, str, params) {
-        return (function () {
+        return (function() {
             return eval(str);
         }).call(this);
     }
@@ -83,7 +83,7 @@ lib("states", function () {
             if (!skipRootEl && typeof el.attr(name) != "undefined") {
                 c.compile.apply(null, [$(el), api, _compileAPI]);
             }
-            el.find("[" + name + "]").each(function (i, e) {
+            el.find("[" + name + "]").each(function(i, e) {
                 c.compile.apply(null, [$(e), api, _compileAPI]);
             });
         }
@@ -91,7 +91,7 @@ lib("states", function () {
 
     function compileAttach(_name, el, api, _api) {
         if (typeof el.attr(_name + "-api") != "undefined") {
-            return (function () {
+            return (function() {
                 return eval(el.attr(_name + "-api") + " = _api");
             }).call(this);
         }
@@ -105,10 +105,10 @@ lib("states", function () {
     }
 
     function _loadTemplate(template) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             var r = new XMLHttpRequest();
             r.open("GET", template);
-            r.onload = function () {
+            r.onload = function() {
                 _templateCache[template] = r.responseText;
                 resolve();
             };
@@ -126,7 +126,7 @@ lib("states", function () {
 
         for (var name in _compiles) {
             var c = _compiles[name];
-            el.find("[" + name + "]").each(function (i, e) {
+            el.find("[" + name + "]").each(function(i, e) {
                 c.compile.apply(null, [$(e), _currentAPI, _compileAPI]);
             });
         }

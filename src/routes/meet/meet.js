@@ -11,6 +11,26 @@ lib("meet", ["states"], function(states) {
 
     var _api;
 
+    states.compile({
+        name: "topic-bar",
+        compile: function(el, api, util) {
+            var $api = {
+                set: set,
+            };
+
+            var barEl = $("<div>").addClass("topic-bar__bar");
+            el.append(barEl);
+
+            util.attach("topic-bar", el, api, $api);
+
+            function set(v) {
+                barEl.css({
+                    width: (100 * v) + "%",
+                });
+            }
+        },
+    });
+
     states.add({
         name: "main",
         template: "src/routes/meet/meet.html",
@@ -37,9 +57,10 @@ lib("meet", ["states"], function(states) {
             svg.appendChild(selectionRoot)
 
             d = new Diagram(params.time || 60);
-            // for (var i = 0; i < 5; i++) {
+            // for (var i = 0; i < 8; i++) {
             //     d.addSection(new Section("A", false).setValue(0));
             // }
+            // d.setActive(d.sections[0]);
 
             _running = true;
         },
@@ -76,6 +97,8 @@ lib("meet", ["states"], function(states) {
                 });
                 api.$topics.render();
                 api.$topic.set("");
+
+                s.$topicBar = api.topics[api.topics.length - 1];
             }
 
             function selectTopic(index) {
@@ -148,6 +171,10 @@ lib("meet", ["states"], function(states) {
             selection.setAttributeNS(null, 'd', describeArc(60, 60, 60, 60, 50, offset, Math.min(359.999, offset + this.getSize() * scale)))
             var a = (offset - 90) * Math.PI / 180;
             line.setAttributeNS(null, 'd', 'M 60 60 L ' + [60 + 50 * Math.cos(a), 60 + 50 * Math.sin(a)].join(' '))
+
+            if (this.$topicBar) {
+                this.$topicBar.$topicBar.set(this.value / this.diagram.totalTime);
+            }
         }
 
         this.update = function(dt, offset, scale) {
@@ -167,6 +194,7 @@ lib("meet", ["states"], function(states) {
         this.done = false;
         this.tick = 0;
         this.time = 0;
+        this.totalTime = time;
 
         this.active = null;
 

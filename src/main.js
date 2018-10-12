@@ -1,4 +1,4 @@
-lib("main", ["states", "routes", "compiles"], function (states) {
+lib("main", ["states", "compiles", "routes"], function(states) {
 
     states.set("start");
 

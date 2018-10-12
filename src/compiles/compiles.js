@@ -1,8 +1,8 @@
-lib("compiles", ["states"], function (states) {
+lib("compiles", ["states"], function(states) {
 
     states.compile({
         name: "for",
-        compile: function (el, api, util) {
+        compile: function(el, api, util) {
             var $api = {
                 render: render,
             };
@@ -44,8 +44,8 @@ lib("compiles", ["states"], function (states) {
 
     states.compile({
         name: "click",
-        compile: function (el, api, util) {
-            el.click(function () {
+        compile: function(el, api, util) {
+            el.click(function() {
                 util.eval(api, el.attr("click"));
             })
         },
@@ -53,8 +53,8 @@ lib("compiles", ["states"], function (states) {
 
     states.compile({
         name: "enter",
-        compile: function (el, api, util) {
-            el.on("keydown", function (evt) {
+        compile: function(el, api, util) {
+            el.on("keydown", function(evt) {
                 if (evt.which == 13) {
                     util.eval(api, el.attr("enter"));
                 }
@@ -64,14 +64,14 @@ lib("compiles", ["states"], function (states) {
 
     states.compile({
         name: "change",
-        compile: function (el, api, util) {
+        compile: function(el, api, util) {
             var $api = {
                 set: set,
             };
 
             util.attach("change", el, api, $api);
 
-            el.on("input", function () {
+            el.on("input", function() {
                 change();
             })
 
@@ -90,7 +90,7 @@ lib("compiles", ["states"], function (states) {
 
     states.compile({
         name: "bind",
-        compile: function (el, api, util) {
+        compile: function(el, api, util) {
             var $api = {
                 render: render,
             };
@@ -107,7 +107,7 @@ lib("compiles", ["states"], function (states) {
 
     states.compile({
         name: "class-obj",
-        compile: function (el, api, util) {
+        compile: function(el, api, util) {
             var $api = {
                 render: render,
             };
@@ -132,7 +132,7 @@ lib("compiles", ["states"], function (states) {
 
     states.compile({
         name: "style-obj",
-        compile: function (el, api, util) {
+        compile: function(el, api, util) {
             var $api = {
                 render: render,
             };

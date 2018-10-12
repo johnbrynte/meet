@@ -156,3 +156,19 @@ svg {
 .topic-item.active {
     text-decoration: underline;
 }
+
+/* topic bar */
+
+[topic-bar] {
+    position: relative;
+}
+
+.topic-bar__bar {
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    height: 4px;
+    background: #ddd;
+}
+
+/* topic bar end */
