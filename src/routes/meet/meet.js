@@ -62,8 +62,8 @@ lib("meet", ["states"], function(states) {
 
             d = new Diagram(params.time || 60);
             //var topics = ["Sorting Hat", "Sorting Hat", "Sorting Hat", "Sorting Hat", "Sorting Hat"];
-            var topics = ["New product", "Sales opportunity", "Sorting", "Sales opportunity", "Development", "Time building"];
-            topics.forEach(t => _api.add(t));
+            // var topics = ["New product", "Sales opportunity", "Sorting", "Sales opportunity", "Development", "Time building"];
+            // topics.forEach(t => _api.add(t));
             // d.setActive(d.sections[0]);
 
             $(window).on("resize", _api._diagram.resize);
