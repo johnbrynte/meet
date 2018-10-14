@@ -144,7 +144,6 @@ lib("compiles", ["states"], function(states) {
             function render() {
                 var objString = util.eval(api, "JSON.stringify(" + el.attr("style-obj") + ")");
                 var obj = JSON.parse(objString);
-                console.log(objString);
                 el.css(obj);
             }
         },

@@ -1,4 +1,4 @@
-﻿window.lib = (function () {
+﻿window.lib = (function() {
 
 	var lib = libFactory;
 
@@ -34,7 +34,7 @@
 	////////////
 
 	function init() {
-		setTimeout(initLibs);
+		$(document).ready(initLibs);
 	}
 
 	function initLibs() {
@@ -72,7 +72,7 @@
 		var c = _libs[node.name];
 
 		if (node.ancestors.indexOf(node.name) != -1) {
-			throw new Error("Circular dependency " + node.ancestors.map(function (name) {
+			throw new Error("Circular dependency " + node.ancestors.map(function(name) {
 				return "'" + name + "'";
 			}).join(" < ") + " < '" + node.name + "'");
 		}

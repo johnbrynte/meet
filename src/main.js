@@ -1,5 +1,5 @@
 lib("main", ["states", "compiles", "routes"], function(states) {
 
-    states.set("start");
+    states.set("main");
 
 });

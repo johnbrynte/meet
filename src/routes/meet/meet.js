@@ -35,6 +35,10 @@ lib("meet", ["states"], function(states) {
         name: "main",
         template: "src/routes/meet/meet.html",
         load: function(params) {
+            params = params || {};
+
+            _api.topic = null;
+
             svg = document.createElementNS(ns, 'svg');
             // svg.setAttributeNS(null, 'width', 120)
             // svg.setAttributeNS(null, 'height', 120)
@@ -57,15 +61,19 @@ lib("meet", ["states"], function(states) {
             svg.appendChild(selectionRoot)
 
             d = new Diagram(params.time || 60);
-            // for (var i = 0; i < 8; i++) {
-            //     d.addSection(new Section("A", false).setValue(0));
-            // }
+            //var topics = ["Sorting Hat", "Sorting Hat", "Sorting Hat", "Sorting Hat", "Sorting Hat"];
+            var topics = ["New product", "Sales opportunity", "Sorting", "Sales opportunity", "Development", "Time building"];
+            topics.forEach(t => _api.add(t));
             // d.setActive(d.sections[0]);
+
+            $(window).on("resize", _api._diagram.resize);
 
             _running = true;
         },
         unload: function() {
             _running = false;
+
+            $(window).off("resize", _api._diagram.resize);
         },
         api: function() {
             var api = {
@@ -75,6 +83,9 @@ lib("meet", ["states"], function(states) {
                 activeIndex: activeIndex,
                 add: add,
                 selectTopic: selectTopic,
+                _diagram: {
+                    resize: diagramResize,
+                },
             };
 
             _api = api;
@@ -83,17 +94,23 @@ lib("meet", ["states"], function(states) {
                 states.set("start");
             }
 
-            function add() {
+            function add(topic) {
                 if (!api.topic) {
-                    return;
+                    if (!topic) {
+                        return;
+                    }
+                    api.topic = topic;
                 }
 
-                var s = new Section(api.topic, false);
+                var abbr = getUniqueAbbreviation(api.topic);
+                var s = new Section(abbr, api.topic, false);
                 d.addSection(s);
 
                 api.topics.push({
+                    abbr: abbr,
                     text: api.topic,
                     color: s.color,
+                    antiColor: s.antiColor,
                 });
                 api.$topics.render();
                 api.$topic.set("");
@@ -111,6 +128,68 @@ lib("meet", ["states"], function(states) {
 
             function activeIndex() {
                 return d.sections.indexOf(d.active);
+            }
+
+            function diagramResize() {
+                var windowHeight = $(window).height();
+
+                if (windowHeight < _api._diagram.windowHeight) {
+                    _api._diagram.windowHeight = windowHeight;
+
+                    var e = $("#drawing svg")[0];
+                    var r = $("#drawing").height() / _api._diagram.svgWidth;
+
+                    if (r < 1) {
+                        e.setAttributeNS(null, "viewBox", "0 0 120 " + (120 * r));
+                    }
+                } else {
+                    _api._diagram.windowHeight = windowHeight;
+                    _api._diagram.svgWidth = $("#drawing svg").width();
+                    _api._diagram.svgHeight = $("#drawing").height();
+
+                    var e = $("#drawing svg")[0];
+
+                    e.setAttributeNS(null, "viewBox", "0 0 120 120");
+                }
+            }
+
+            function getUniqueAbbreviation(t) {
+                var s = "." + api.topics.map(function(_t) {
+                    return _t.abbr;
+                }).join(".") + ".";
+
+                t = t.trim().toLowerCase();
+
+                var p = t.split(/\s+/g);
+                var size = 0;
+                var index = p.map(function(_p) {
+                    size += _p.length;
+                    return 0;
+                });
+                var parts = p.map(function() {
+                    return "";
+                });
+
+                var i = 0;
+                var j = 0;
+                while (i < size) {
+                    parts[j] += parts[j].length == 0 ? p[j][index[j]].toUpperCase() : p[j][index[j]];
+                    var abbr = parts.join("");
+
+                    if (checkAvailability(abbr)) {
+                        return abbr;
+                    }
+
+                    i++;
+                    index[j]++;
+                    j = (j + 1) % parts.length;
+                }
+
+                return t;
+
+                function checkAvailability(a) {
+                    return !s.match(new RegExp("\\." + a + "\\.", "g"));
+                }
             }
 
             return api;
@@ -132,12 +211,25 @@ lib("meet", ["states"], function(states) {
         }
     }
 
-    function Section(name, fixed) {
+    function Section(abbr, name, fixed) {
         var _this = this;
 
+        var c = [Math.round(255 - Math.random() * 128), Math.round(255 - Math.random() * 128), Math.round(255 - Math.random() * 128)];
+
+        this.abbr = abbr;
         this.name = name;
         this.active = false;
-        this.color = 'rgb(' + [Math.round(255 - Math.random() * 128), Math.round(255 - Math.random() * 128), Math.round(255 - Math.random() * 128)].join(',') + ')';
+        this.color = 'rgb(' + c.join(',') + ')';
+        this.antiColor = getContrast(c);
+
+        // http://24ways.org/2010/calculating-color-contrast/
+        function getContrast(c) {
+            var r = c[0],
+                g = c[1],
+                b = c[2],
+                yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 128) ? 'black' : 'white';
+        }
 
         var path = document.createElementNS(ns, 'path')
         path.setAttributeNS(null, 'fill', this.color)
@@ -146,6 +238,12 @@ lib("meet", ["states"], function(states) {
         var line = document.createElementNS(ns, 'path')
         line.setAttributeNS(null, 'stroke', '#ddd')
         lineRoot.appendChild(line)
+
+        var text = document.createElementNS(ns, 'text')
+        text.setAttributeNS(null, 'text-anchor', 'middle');
+        text.setAttributeNS(null, 'alignment-baseline', 'middle');
+        text.innerHTML = abbr;
+        lineRoot.appendChild(text)
 
         var selection = document.createElementNS(ns, 'path')
         selection.setAttributeNS(null, 'class', 'selection')
@@ -171,6 +269,9 @@ lib("meet", ["states"], function(states) {
             selection.setAttributeNS(null, 'd', describeArc(60, 60, 60, 60, 50, offset, Math.min(359.999, offset + this.getSize() * scale)))
             var a = (offset - 90) * Math.PI / 180;
             line.setAttributeNS(null, 'd', 'M 60 60 L ' + [60 + 50 * Math.cos(a), 60 + 50 * Math.sin(a)].join(' '))
+
+            text.setAttributeNS(null, 'x', 60 + 55 * Math.cos(Math.PI * (offset + this.getSize() * scale / 2 - 90) / 180));
+            text.setAttributeNS(null, 'y', 60 + 55 * Math.sin(Math.PI * (offset + this.getSize() * scale / 2 - 90) / 180));
 
             if (this.$topicBar) {
                 this.$topicBar.$topicBar.set(this.value / this.diagram.totalTime);
