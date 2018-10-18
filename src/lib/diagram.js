@@ -10,6 +10,7 @@ lib("Diagram", ["Section"], function(Section) {
         this.sections = [];
         this.part = 0;
         this.total = 1;
+        this.largestSection = 1;
 
         this.done = false;
         this.tick = 0;
@@ -93,9 +94,13 @@ lib("Diagram", ["Section"], function(Section) {
                 s.total = _timeLeft * s._part / _partTotal;
             });
 
+            this.largestSection = 0;
+
             var total = 0;
             this.sections.forEach(function(s) {
-                total += s.getSize();
+                var size = s.getSize();
+                total += size;
+                _this.largestSection = Math.max(_this.largestSection, size);
             });
             this.part = _part;
             this.total = total;

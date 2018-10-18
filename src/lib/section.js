@@ -61,7 +61,7 @@ lib("Section", function() {
             text.setAttributeNS(null, 'y', 60 + 55 * Math.sin(Math.PI * (offset + this.getSize() * scale / 2 - 90) / 180));
 
             if (this.$topicBar) {
-                this.$topicBar.set(this.value / this.diagram.totalTime);
+                this.$topicBar.set(this.value / this.diagram.largestSection);
             }
         }
 
