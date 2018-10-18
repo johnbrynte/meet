@@ -1,4 +1,4 @@
-lib("start", ["states"], function(states) {
+lib("start", ["states", "DB"], function(states, DB) {
 
     states.add({
         name: "start",
@@ -51,6 +51,7 @@ lib("start", ["states"], function(states) {
 
             function load() {
                 var data = {
+                    id: 'id',
                     time: 60,
                     topics: [
                         {

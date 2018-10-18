@@ -1,4 +1,4 @@
-lib("meet", ["states", "Diagram", "Section"], function(states, Diagram, Section) {
+lib("meet", ["states", "Diagram", "Section", "DB"], function(states, Diagram, Section, DB) {
 
     var ns = 'http://www.w3.org/2000/svg'
 
@@ -63,6 +63,7 @@ lib("meet", ["states", "Diagram", "Section"], function(states, Diagram, Section)
             d.$activeTopic = _api.$activeTopic;
 
             _api.setDiagram(d);
+            DB.saveDiagram(d);
 
             svg.appendChild(d.element);
 

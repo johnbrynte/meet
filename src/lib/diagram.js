@@ -7,6 +7,8 @@ lib("Diagram", ["Section"], function(Section) {
 
         var time;
 
+        this.id = Date.now().toString(32);
+
         this.sections = [];
         this.part = 0;
         this.total = 1;
@@ -32,6 +34,7 @@ lib("Diagram", ["Section"], function(Section) {
                 if (typeof in_data == "number") {
                     time = in_data;
                 } else {
+                    _this.id = in_data.id;
                     time = in_data.time;
                     if (in_data.topics) {
                         for (var i = 0; i < in_data.topics.length; i++) {
@@ -188,6 +191,20 @@ lib("Diagram", ["Section"], function(Section) {
                 return !s.match(new RegExp("\\." + a + "\\.", "g"));
             }
         }
+
+        this.toDataObject = function() {
+            var data = {
+                id: this.id,
+                time: this.totalTime,
+                topics: this.sections.map(function(s) {
+                    return {
+                        n: s.name,
+                        v: s.value,
+                    };
+                }),
+            };
+            return data;
+        };
 
         init();
     }
