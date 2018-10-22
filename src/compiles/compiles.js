@@ -89,6 +89,23 @@ lib("compiles", ["states"], function(states) {
     });
 
     states.compile({
+        name: "init",
+        compile: function(el, api, util) {
+            var $api = {
+                update: update,
+            };
+
+            util.attach("init", el, api, $api);
+
+            update();
+
+            function update() {
+                el.val(util.eval(api, el.attr("init")));
+            }
+        },
+    });
+
+    states.compile({
         name: "bind",
         compile: function(el, api, util) {
             var $api = {
@@ -118,14 +135,16 @@ lib("compiles", ["states"], function(states) {
 
             function render() {
                 var objString = util.eval(api, "JSON.stringify(" + el.attr("class-obj") + ")");
-                var obj = JSON.parse(objString);
-                for (var c in obj) {
-                    if (obj[c]) {
-                        el.addClass(c);
-                    } else {
-                        el.removeClass(c);
+                try {
+                    var obj = JSON.parse(objString);
+                    for (var c in obj) {
+                        if (obj[c]) {
+                            el.addClass(c);
+                        } else {
+                            el.removeClass(c);
+                        }
                     }
-                }
+                } catch (e) { }
             }
         },
     });
@@ -143,8 +162,10 @@ lib("compiles", ["states"], function(states) {
 
             function render() {
                 var objString = util.eval(api, "JSON.stringify(" + el.attr("style-obj") + ")");
-                var obj = JSON.parse(objString);
-                el.css(obj);
+                try {
+                    var obj = JSON.parse(objString);
+                    el.css(obj);
+                } catch (e) { }
             }
         },
     });

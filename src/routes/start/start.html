@@ -7,4 +7,9 @@
         placeholder="20 min">
     <button class="c_input-button" click="api.start()">Start meeting</button>
     <button class="c_input-button" click="api.load()">Load test meeting</button>
+
+    <h2>Diagrams</h2>
+    <div for="api.diagrams">
+        <button class="c_input-button" click="api.parent.load(api.item)">Load '<span bind="api.item.name || api.item.id"></span>'</button>
+    </div>
 </div>

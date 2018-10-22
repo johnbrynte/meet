@@ -8,6 +8,7 @@ lib("Diagram", ["Section"], function(Section) {
         var time;
 
         this.id = Date.now().toString(32);
+        this.name = null;
 
         this.sections = [];
         this.part = 0;
@@ -35,17 +36,21 @@ lib("Diagram", ["Section"], function(Section) {
                     time = in_data;
                 } else {
                     _this.id = in_data.id;
+                    _this.name = in_data.name;
                     time = in_data.time;
                     if (in_data.topics) {
                         for (var i = 0; i < in_data.topics.length; i++) {
                             var t = in_data.topics[i];
                             var abbr = _this.getUniqueAbbreviation(t.n);
-                            var s = new Section(abbr, t.n, false);//.setValue(t.v);
+                            var s = new Section(abbr, t.n, false).setValue(t.v);
                             _this.addSection(s);
                         }
                     }
-                    if (!isNaN(in_data.active)) {
-                        _this.setActive(_this.sections[in_data.active]);
+                    if (in_data.active) {
+                        _this.setActive(_this.sections[in_data.active.i]);
+                        var t = (Date.now() - in_data.active.t) / 1000;
+                        t = Math.min(t, _this.totalLeft)
+                        _this.sections[in_data.active.i].value += t;
                     }
                 }
                 _this.totalTime = time;
@@ -53,14 +58,16 @@ lib("Diagram", ["Section"], function(Section) {
         }
 
         this.addSection = function(section) {
-            var offset = 0;
-            for (var i = 0; i < this.sections.length - 1; i++) {
+            this.sections.push(section);
+            section.setDiagram(this);
+
+            this.recalculateTotal();
+
+            var offset = this.sections.length == 1 ? -20 : 0;
+            for (var i = 0; i < this.sections.length - 2; i++) {
                 offset += this.sections[i].getSize() * 360 / this.total;
             }
-
-            this.sections.push(section);
             section.virtualValue = offset;
-            section.setDiagram(this);
         }
 
         this.render = function() {
@@ -76,6 +83,36 @@ lib("Diagram", ["Section"], function(Section) {
             var _this = this;
 
             this.tick += dt * 1;
+
+            this.recalculateTotal();
+
+            if (this.active) {
+
+                if (!this.done) {
+                    this.active.value += dt * 1;
+                    this.time += dt * 1;
+
+                    if (this.totalValue > this.time) {
+                        console.log("pling");
+                        this.time = this.totalValue;
+                    }
+
+                    if (this.time >= time) {
+                        this.done = true;
+                        document.getElementById("mainTime").className += "overtime";
+                    }
+                }
+            }
+
+            var offset = 0;
+            this.sections.forEach(function(s, i) {
+                s.update(dt, offset, 360 / _this.total);
+                offset += s.getSize() * 360 / _this.total;
+            });
+        }
+
+        this.recalculateTotal = function() {
+            var _this = this;
 
             var _total = 0;
             this.sections.forEach(function(s) {
@@ -93,7 +130,7 @@ lib("Diagram", ["Section"], function(Section) {
                 }
                 _partTotal += s._part;
             });
-            this.sections.forEach(function(s) {
+            this.sections.forEach(function(s, i) {
                 s.total = _timeLeft * s._part / _partTotal;
             });
 
@@ -107,25 +144,8 @@ lib("Diagram", ["Section"], function(Section) {
             });
             this.part = _part;
             this.total = total;
-
-            if (this.active) {
-
-                if (!this.done) {
-                    this.active.value += dt * 1;
-                    this.time += dt * 1;
-
-                    if (this.time >= time) {
-                        this.done = true;
-                        document.getElementById("mainTime").className += "overtime";
-                    }
-                }
-            }
-
-            var offset = 0;
-            this.sections.forEach(function(s) {
-                s.update(dt, offset, 360 / _this.total);
-                offset += s.getSize() * 360 / _this.total;
-            });
+            this.totalValue = _total;
+            this.totalLeft = _timeLeft;
         }
 
         this.setActive = function(s) {
@@ -143,6 +163,15 @@ lib("Diagram", ["Section"], function(Section) {
             if (this.$activeTopic) {
                 this.$activeTopic.render();
             }
+        }
+
+        this.reset = function() {
+            this.sections.forEach(function(s, i) {
+                s.value = 0;
+            });
+            this.done = false;
+            this.time = 0;
+            this.setActive(null);
         }
 
         this.getTime = function() {
@@ -195,7 +224,12 @@ lib("Diagram", ["Section"], function(Section) {
         this.toDataObject = function() {
             var data = {
                 id: this.id,
+                name: this.name,
                 time: this.totalTime,
+                active: this.active ? {
+                    i: this.sections.indexOf(this.active),
+                    t: Date.now(),
+                } : null,
                 topics: this.sections.map(function(s) {
                     return {
                         n: s.name,

@@ -45,15 +45,12 @@ lib("states", function() {
 
         new Promise(function(resolve, reject) {
             if (opts.template) {
-                if (_templateCache[opts.template]) {
+                _loadTemplate(opts.template).then(function() {
                     _compileTemplate(opts.template);
                     resolve();
-                } else {
-                    _loadTemplate(opts.template).then(function() {
-                        _compileTemplate(opts.template);
-                        resolve();
-                    });
-                }
+                });
+            } else {
+                resolve();
             }
         }).then(function() {
             if (opts.load) {
@@ -72,27 +69,22 @@ lib("states", function() {
 
     function compileEval(api, str, params) {
         return (function() {
-            return eval(str);
+            try {
+                return eval(str);
+            } catch (e) { }
         }).call(this);
     }
 
     function compileElement(el, api, skipRootEl) {
-        el = $(el);
-        for (var name in _compiles) {
-            var c = _compiles[name];
-            if (!skipRootEl && typeof el.attr(name) != "undefined") {
-                c.compile.apply(null, [$(el), api, _compileAPI]);
-            }
-            el.find("[" + name + "]").each(function(i, e) {
-                c.compile.apply(null, [$(e), api, _compileAPI]);
-            });
-        }
+        _compileElement($(el), api, skipRootEl);
     }
 
     function compileAttach(_name, el, api, _api) {
         if (typeof el.attr(_name + "-api") != "undefined") {
             return (function() {
-                return eval(el.attr(_name + "-api") + " = _api");
+                try {
+                    return eval(el.attr(_name + "-api") + " = _api");
+                } catch (e) { }
             }).call(this);
         }
     }
@@ -106,11 +98,16 @@ lib("states", function() {
 
     function _loadTemplate(template) {
         return new Promise(function(resolve, reject) {
+            if (_templateCache[template]) {
+                resolve(_templateCache[template]);
+                return;
+            }
+
             var r = new XMLHttpRequest();
             r.open("GET", template);
             r.onload = function() {
                 _templateCache[template] = r.responseText;
-                resolve();
+                resolve(_templateCache[template]);
             };
             r.send();
         });
@@ -124,11 +121,43 @@ lib("states", function() {
             _currentAPI = _current.api.apply(null);
         }
 
+        _compileElement(el, _currentAPI, true);
+    }
+
+    function _compileElement(el, api, skipRootEl) {
+        var elems = {};
+        for (var name in _compiles) {
+            elems[name] = el.find("[" + name + "]");
+        }
         for (var name in _compiles) {
             var c = _compiles[name];
-            el.find("[" + name + "]").each(function(i, e) {
-                c.compile.apply(null, [$(e), _currentAPI, _compileAPI]);
+
+            if (!skipRootEl && typeof el.attr(name) != "undefined") {
+                _compileCompile(c, el, api);
+            }
+
+            elems[name].each(function(i, e) {
+                _compileCompile(c, $(e), api);
             });
+        }
+    }
+
+    function _compileCompile(c, el, api) {
+        if (c.template) {
+            _loadTemplate(c.template).then(function(template) {
+                el.html(template);
+                _comp();
+                // recursive
+                //setTimeout(function() {
+                _compileElement(el, api, true);
+                //});
+            });
+        } else {
+            _comp();
+        }
+
+        function _comp() {
+            c.compile.apply(null, [$(el), api, _compileAPI]);
         }
     }
 

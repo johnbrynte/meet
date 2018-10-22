@@ -3,6 +3,7 @@ lib("DB", function() {
     var DB = {
         removeDiagram: removeDiagram,
         saveDiagram: saveDiagram,
+        getDiagrams: getDiagrams,
     };
 
     var storage = [];
@@ -46,6 +47,10 @@ lib("DB", function() {
         storage.push(d.toDataObject());
 
         save();
+    }
+
+    function getDiagrams() {
+        return storage;
     }
 
 });

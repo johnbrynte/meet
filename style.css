@@ -16,6 +16,10 @@ input, button {
     outline: none;
 }
 
+h2 {
+    margin: 0.6em 0 0.2em 0;
+}
+
 .v_root {
     display: flex;
     flex-direction: column;
@@ -62,7 +66,6 @@ input, button {
 }
 
 .v_start .c_input-button {
-    float: right;
     width: 100%;
 }
 
@@ -72,9 +75,14 @@ input, button {
 
 .c_meet-top {
     position: absolute;
-    left: 20px;
+    left: 0;
     top: 0;
     font-size: 0.8em;
+    width: 100%;
+    padding: 2px 15px;
+
+    display: flex;
+    justify-content: space-between;
 }
 
 .c_meet-bottom {
@@ -110,6 +118,43 @@ input, button {
     max-width: 500px;
     margin: 0 auto;
 }
+
+/* meet menu */
+
+[meet-menu] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    transform: translate(110%,0);
+    transition: 0.3s ease-out;
+}
+
+[meet-menu].open {
+    transform: translate(0,0);
+}
+
+.meet-menu__content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 15px 30px;
+    background: #26272c;
+    box-shadow: -2px 0 8px 0 rgba(0,0,0,0.3);
+}
+
+.meet-menu__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* meet menu end */
 
 /* meet end */
 

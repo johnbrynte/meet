@@ -5,6 +5,7 @@ lib("start", ["states", "DB"], function(states, DB) {
         template: "src/routes/start/start.html",
         api: function() {
             var api = {
+                diagrams: DB.getDiagrams(),
                 start: start,
                 load: load,
             };
@@ -49,37 +50,39 @@ lib("start", ["states", "DB"], function(states, DB) {
                 return seconds;
             }
 
-            function load() {
-                var data = {
-                    id: 'id',
-                    time: 60,
-                    topics: [
-                        {
-                            n: "New product",
-                            v: 0,
-                        },
-                        {
-                            n: "Sales opportunity",
-                            v: 0,
-                        },
-                        {
-                            n: "Sorting",
-                            v: 0,
-                        },
-                        {
-                            n: "Sales opportunity",
-                            v: 0,
-                        },
-                        {
-                            n: "Development",
-                            v: 0,
-                        },
-                        {
-                            n: "Team building",
-                            v: 0,
-                        }
-                    ],
-                };
+            function load(data) {
+                if (!data) {
+                    data = {
+                        id: 'test meeting',
+                        time: 60,
+                        topics: [
+                            {
+                                n: "New product",
+                                v: 0,
+                            },
+                            {
+                                n: "Sales opportunity",
+                                v: 0,
+                            },
+                            {
+                                n: "Sorting",
+                                v: 0,
+                            },
+                            {
+                                n: "Sales opportunity",
+                                v: 0,
+                            },
+                            {
+                                n: "Development",
+                                v: 0,
+                            },
+                            {
+                                n: "Team building",
+                                v: 0,
+                            }
+                        ],
+                    };
+                }
                 states.set("main", {
                     data: data,
                 });

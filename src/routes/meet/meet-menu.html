@@ -1,0 +1,12 @@
+<div class="meet-menu__backdrop"></div>
+<div class="meet-menu__content">
+    <h1>Menu</h1>
+    <input class="c_input-text" type="text"
+        change="api.setName(params.value)"
+        init="api.diagram.name"
+        init-api="api.$menu.$name"
+        placeholder="Name">
+    <p click="api.pause(); api.$menu.close()">Pause</p>
+    <p click="api.reset(); api.$menu.close()">Reset</p>
+    <p click="api.remove(); api.$menu.close()">Remove</p>
+</div>

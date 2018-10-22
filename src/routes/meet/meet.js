@@ -1,4 +1,4 @@
-lib("meet", ["states", "Diagram", "Section", "DB"], function(states, Diagram, Section, DB) {
+lib("meet", ["states", "Diagram", "Section", "DB", "meetMenu"], function(states, Diagram, Section, DB) {
 
     var ns = 'http://www.w3.org/2000/svg'
 
@@ -10,6 +10,7 @@ lib("meet", ["states", "Diagram", "Section", "DB"], function(states, Diagram, Se
     timer(update, fixedUpdate);
 
     var _api;
+    var _lastSaveCheck = 0;
 
     states.compile({
         name: "topic-bar",
@@ -83,7 +84,11 @@ lib("meet", ["states", "Diagram", "Section", "DB"], function(states, Diagram, Se
                 activeTopic: activeTopic,
                 activeIndex: activeIndex,
                 add: add,
+                pause: pause,
+                reset: reset,
+                remove: remove,
                 selectTopic: selectTopic,
+                setName: setName,
                 setDiagram: setDiagram,
                 _diagram: {
                     resize: diagramResize,
@@ -111,13 +116,37 @@ lib("meet", ["states", "Diagram", "Section", "DB"], function(states, Diagram, Se
                 //api.topics.push(s);
                 api.$topics.render();
                 api.$topic.set("");
+
+                DB.saveDiagram(d);
+            }
+
+            function pause() {
+                d.setActive(null);
+                DB.saveDiagram(d);
+            }
+
+            function reset() {
+                d.reset();
+                DB.saveDiagram(d);
+            }
+
+            function remove() {
+                DB.removeDiagram(d);
+                states.set("start");
             }
 
             function selectTopic(index) {
                 d.setActive(d.sections[index]);
+                DB.saveDiagram(d);
+            }
+
+            function setName(n) {
+                d.name = n;
+                DB.saveDiagram(d);
             }
 
             function setDiagram(d) {
+                api.diagram = d;
                 api.topics = d.sections;
 
                 api.$topics.render();
@@ -171,6 +200,12 @@ lib("meet", ["states", "Diagram", "Section", "DB"], function(states, Diagram, Se
     function fixedUpdate(dt) {
         if (_running) {
             d.update(dt);
+
+            _lastSaveCheck += dt;
+            if (_lastSaveCheck > 2) {
+                DB.saveDiagram(d);
+                _lastSaveCheck = 0;
+            }
         }
     }
 
