@@ -1,4 +1,4 @@
-﻿var timer = (function () {
+﻿var timer = (function() {
 
   var timer = init;
 
@@ -9,7 +9,7 @@
   timer.n = Date.now();
   timer.t = 0;
 
-  var variablecb = function () { }, fixedcb = function () { };
+  var variablecb = function() { }, fixedcb = function() { };
 
   return timer;
 

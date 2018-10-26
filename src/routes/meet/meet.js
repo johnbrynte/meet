@@ -1,4 +1,4 @@
-lib("meet", ["states", "Diagram", "Section", "DB", "meetMenu"], function(states, Diagram, Section, DB) {
+lib("meet", ["states", "util", "Diagram", "Section", "DB", "meetMenu"], function(states, util, Diagram, Section, DB) {
 
     var ns = 'http://www.w3.org/2000/svg'
 
@@ -70,12 +70,18 @@ lib("meet", ["states", "Diagram", "Section", "DB", "meetMenu"], function(states,
 
             $(window).on("resize", _api._diagram.resize);
 
+            util.onWindowFocus.on(onWindowFocus);
+            util.onWindowBlur.on(onWindowBlur);
+
             _running = true;
         },
         unload: function() {
             _running = false;
 
             $(window).off("resize", _api._diagram.resize);
+
+            util.onWindowFocus.off(onWindowFocus);
+            util.onWindowBlur.off(onWindowBlur);
         },
         api: function() {
             var api = {
@@ -187,6 +193,14 @@ lib("meet", ["states", "Diagram", "Section", "DB", "meetMenu"], function(states,
             return api;
         },
     });
+
+    function onWindowFocus() {
+        d.resume();
+    }
+
+    function onWindowBlur() {
+        d.pause();
+    }
 
     function update(dt) {
         if (_running) {

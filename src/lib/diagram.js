@@ -21,6 +21,7 @@ lib("Diagram", ["Section"], function(Section) {
         this.totalTime = 0;
 
         this.active = null;
+        this.isPaused = false;
 
         this.element = document.createElementNS(ns, 'g');
         this.pathRoot = document.createElementNS(ns, 'g');
@@ -37,6 +38,7 @@ lib("Diagram", ["Section"], function(Section) {
                 } else {
                     _this.id = in_data.id;
                     _this.name = in_data.name;
+                    _this.isPaused = in_data.pause;
                     time = in_data.time;
                     if (in_data.topics) {
                         for (var i = 0; i < in_data.topics.length; i++) {
@@ -47,14 +49,14 @@ lib("Diagram", ["Section"], function(Section) {
                         }
                     }
                     if (in_data.active) {
-                        _this.setActive(_this.sections[in_data.active.i]);
-                        var t = (Date.now() - in_data.active.t) / 1000;
-                        t = Math.min(t, _this.totalLeft)
-                        _this.sections[in_data.active.i].value += t;
+                        var s = _this.sections[in_data.active.i];
+                        s.lastCheck = in_data.active.t;
+                        _this.setActive(s);
                     }
                 }
                 _this.totalTime = time;
             }
+            _this.resume();
         }
 
         this.addSection = function(section) {
@@ -82,6 +84,10 @@ lib("Diagram", ["Section"], function(Section) {
         this.update = function(dt) {
             var _this = this;
 
+            if (this.isPaused) {
+                return;
+            }
+
             this.tick += dt * 1;
 
             this.recalculateTotal();
@@ -93,7 +99,6 @@ lib("Diagram", ["Section"], function(Section) {
                     this.time += dt * 1;
 
                     if (this.totalValue > this.time) {
-                        console.log("pling");
                         this.time = this.totalValue;
                     }
 
@@ -225,6 +230,7 @@ lib("Diagram", ["Section"], function(Section) {
             var data = {
                 id: this.id,
                 name: this.name,
+                pause: this.isPaused,
                 time: this.totalTime,
                 active: this.active ? {
                     i: this.sections.indexOf(this.active),
@@ -239,6 +245,23 @@ lib("Diagram", ["Section"], function(Section) {
             };
             return data;
         };
+
+        this.pause = function() {
+            if (this.active) {
+                this.active.lastCheck = Date.now();
+            }
+            this.isPaused = true;
+        }
+
+        this.resume = function() {
+            if (this.active) {
+                _this.setActive(this.active);
+                var t = (Date.now() - this.active.lastCheck) / 1000;
+                t = Math.min(t, _this.totalLeft)
+                this.active.value += t;
+            }
+            this.isPaused = false;
+        }
 
         init();
     }
